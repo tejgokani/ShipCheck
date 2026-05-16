@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+# shipcheck post-session hook for Claude Code
+# Installed by: shipcheck init
+# Location: ~/.claude/hooks/post-session
+#
+# This hook runs automatically after each Claude Code session ends.
+# It calls `shipcheck --quiet` to print a one-line summary of cost + score.
+# Full details are available by running `shipcheck` or `shipcheck report`.
+
+# Only run if shipcheck is installed
+if ! command -v shipcheck >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Only run if the user has opted in (flag file set by `shipcheck init`)
+SHIPCHECK_INIT_FLAG="${HOME}/.config/shipcheck/.hooks-enabled"
+if [ ! -f "$SHIPCHECK_INIT_FLAG" ]; then
+    exit 0
+fi
+
+# Get the current working directory (Claude Code sets this via CLAUDE_PROJECT_DIR or PWD)
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${PWD}}"
+
+# Don't run if there's no git repo or recognized project
+if [ ! -d "${PROJECT_DIR}/.git" ] && [ ! -f "${PROJECT_DIR}/go.mod" ] && [ ! -f "${PROJECT_DIR}/package.json" ]; then
+    exit 0
+fi
+
+# Run shipcheck in quiet mode — outputs one line: "Score: 82/100 GOOD | $0.84 | 3 findings"
+# Suppress errors silently — the hook should never disrupt the user's workflow
+shipcheck --quiet --dir "$PROJECT_DIR" 2>/dev/null || true

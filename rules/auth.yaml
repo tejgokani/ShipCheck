@@ -1,0 +1,27 @@
+rules:
+  - id: SEC-301
+    name: Wildcard CORS
+    severity: medium
+    languages: ["go", "typescript", "javascript", "python"]
+    description: >
+      Access-Control-Allow-Origin set to * disables the same-origin
+      protection entirely. AI applies this to fix CORS errors during
+      development and forgets to restrict it before shipping.
+
+  - id: SEC-302
+    name: SSL Verification Disabled
+    severity: high
+    languages: ["python"]
+    description: >
+      requests.get(..., verify=False) disables TLS certificate verification,
+      enabling man-in-the-middle attacks. AI adds this to fix SSL certificate
+      errors in development or corporate proxy environments.
+
+  - id: SEC-305
+    name: Debug Mode Enabled
+    severity: medium
+    languages: ["python", "typescript", "javascript", "env", "yaml"]
+    description: >
+      DEBUG=True or debug: true exposes stack traces, internal state,
+      and disables security controls. AI scaffolds apps in debug mode and
+      often forgets to disable it before shipping.

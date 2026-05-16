@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+# shipcheck post-session hook for Cursor
+# Installed by: shipcheck init
+# Location: ~/.cursor-hook (sourced from shell profile)
+#
+# For Cursor, we wrap the `cursor` command using a shell function so that
+# shipcheck runs when Cursor exits. Add this to your ~/.zshrc or ~/.bashrc:
+#
+#   source ~/.cursor-hook
+#
+# Or run: shipcheck init   — which does this automatically.
+
+# Only set up the hook if shipcheck is installed
+if ! command -v shipcheck >/dev/null 2>&1; then
+    return 0 2>/dev/null || exit 0
+fi
+
+# Only run if the user has opted in
+SHIPCHECK_INIT_FLAG="${HOME}/.config/shipcheck/.hooks-enabled"
+if [ ! -f "$SHIPCHECK_INIT_FLAG" ]; then
+    return 0 2>/dev/null || exit 0
+fi
+
+# Wrap the cursor command
+# When cursor exits, run shipcheck in the directory that was open
+cursor() {
+    # Call the real cursor binary
+    command cursor "$@"
+    EXIT_CODE=$?
+
+    # Run shipcheck after Cursor exits
+    PROJECT_DIR="${1:-${PWD}}"
+    if command -v shipcheck >/dev/null 2>&1; then
+        shipcheck --quiet --dir "$PROJECT_DIR" 2>/dev/null || true
+    fi
+
+    return $EXIT_CODE
+}
+
+# Export so subshells inherit it
+export -f cursor 2>/dev/null || true

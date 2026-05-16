@@ -1,0 +1,49 @@
+name: Security (Dogfood)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  shipcheck-scan:
+    name: shipcheck self-scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50  # needed for heatmap git history analysis
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build shipcheck
+        run: go build -ldflags="-s -w -X main.version=dogfood" -o bin/shipcheck .
+
+      - name: Run shipcheck security scan
+        id: scan
+        run: |
+          ./bin/shipcheck scan --sec --no-session --no-heatmap --json > shipcheck-report.json 2>&1 || SCAN_EXIT=$?
+          echo "exit_code=${SCAN_EXIT:-0}" >> "$GITHUB_OUTPUT"
+          cat shipcheck-report.json
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shipcheck-security-report
+          path: shipcheck-report.json
+          retention-days: 30
+
+      - name: Fail on critical findings
+        run: |
+          ./bin/shipcheck scan --sec --no-session --no-heatmap --fail-on critical --dir . 2>/dev/null || {
+            echo "::error::shipcheck found CRITICAL security findings. Fix before merging."
+            exit 1
+          }

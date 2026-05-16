@@ -1,0 +1,2 @@
+{"type":"completion","model":"o3","timestamp":"2026-05-16T12:00:00Z","cost":0.50,"usage":{"prompt_tokens":15000,"completion_tokens":3000},"file":"src/index.py"}
+{"type":"completion","model":"o3","timestamp":"2026-05-16T12:10:00Z","cost":0.25,"usage":{"input_tokens":7500,"output_tokens":1500},"file":"src/utils.py"}

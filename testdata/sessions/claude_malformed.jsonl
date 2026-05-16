@@ -1,0 +1,3 @@
+{"type":"tool_use","cost":0.10,"tokensIn":5000,"tokensOut":1000,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-16T09:00:00Z","file":"main.go","model":"claude-sonnet-4-6"}
+THIS IS NOT JSON and should be skipped with a warning
+{"type":"tool_use","cost":0.05,"tokensIn":2500,"tokensOut":500,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-16T09:05:00Z","file":"main.go","model":"claude-sonnet-4-6"}

@@ -1,0 +1,19 @@
+rules:
+  - id: SEC-401
+    name: NEXT_PUBLIC_ Secret Leak
+    severity: critical
+    languages: ["env", "typescript", "javascript"]
+    description: >
+      NEXT_PUBLIC_ prefix makes env vars available in the browser bundle.
+      AI adds this prefix to "fix" undefined variable errors when a
+      backend secret is referenced in a component, exposing it to every
+      user who loads the page.
+
+  - id: SEC-501
+    name: Deferred Security TODO
+    severity: low
+    languages: ["*"]
+    description: >
+      TODO or FIXME comment referencing auth, validation, sanitization,
+      or other security work. AI defers security implementation with these
+      placeholders that are rarely addressed before shipping.

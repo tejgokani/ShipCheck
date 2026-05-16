@@ -1,0 +1,115 @@
+# .shipcheckirgnore — files and directories shipcheck will skip when scanning
+# Same format as .gitignore
+
+# Dependencies
+node_modules/
+vendor/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+__pycache__/
+*.pyc
+*.pyo
+target/
+bin/
+obj/
+
+# Version control
+.git/
+.svn/
+.hg/
+
+# Test artifacts
+coverage/
+coverage.out
+*.test
+.nyc_output/
+htmlcov/
+
+# Generated files
+*.pb.go
+*_generated.go
+*_gen.go
+*.min.js
+*.min.css
+*.map
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Lock files (usually not worth scanning)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+Cargo.lock
+poetry.lock
+Gemfile.lock
+go.sum
+
+# Docker
+.dockerignore
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Serverless
+.serverless/
+
+# Mobile
+ios/Pods/
+android/.gradle/
+android/build/
+
+# Compiled binaries (no point scanning)
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+
+# Archives
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Temporary
+tmp/
+temp/
+.tmp/
+
+# shipcheck self-scan exclusions — intentionally vulnerable fixtures, rule descriptions,
+# and rule source (which contains the patterns it looks for in comments/strings).
+testdata/
+rules/
+internal/security/

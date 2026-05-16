@@ -1,0 +1,24 @@
+# Binaries
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build artifacts
+shipcheck-report.html
+
+# Go
+vendor/
+coverage.out
+*.test
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Goreleaser output
+dist/

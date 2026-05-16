@@ -1,0 +1,112 @@
+version: 2
+
+project_name: shipcheck
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: shipcheck
+    main: .
+    binary: shipcheck
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: shipcheck
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}arm64
+      {{- else }}{{ .Arch }}{{ end }}
+    # Use formats map instead of deprecated format_overrides
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: "New Features"
+      regexp: "^feat"
+      order: 0
+    - title: "Bug Fixes"
+      regexp: "^fix"
+      order: 1
+    - title: "Security"
+      regexp: "^sec"
+      order: 2
+    - title: Other
+      order: 999
+
+# homebrew_casks replaces deprecated brews
+homebrew_casks:
+  - name: shipcheck
+    repository:
+      owner: tejgokani
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Casks
+    homepage: "https://github.com/tejgokani/shipcheck"
+    description: "Post-session audit tool for AI coding agents — cost, heatmap, security scan"
+
+release:
+  github:
+    owner: tejgokani
+    name: shipcheck
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"
+  header: |
+    ## shipcheck v{{.Version}}
+
+    One command. Zero API calls. Full post-session audit for AI coding agents.
+  footer: |
+    **Install:**
+    ```bash
+    brew install tejgokani/tap/shipcheck
+    # or
+    curl -fsSL https://get.shipcheck.dev | sh
+    ```

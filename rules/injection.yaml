@@ -1,0 +1,27 @@
+rules:
+  - id: SEC-201
+    name: SQL String Concatenation
+    severity: critical
+    languages: ["go", "typescript", "javascript", "python"]
+    description: >
+      SQL query built with string concatenation or f-string interpolation.
+      AI generates the simplest working SQL first — parameterization is
+      treated as an afterthought or optimization. Enables SQL injection.
+
+  - id: SEC-202
+    name: eval() on User Input
+    severity: critical
+    languages: ["typescript", "javascript", "python"]
+    description: >
+      eval() or exec() called with what may be user-controlled data.
+      AI uses eval for dynamic config loading, template evaluation,
+      or "quick" scripting solutions. Enables arbitrary code execution.
+
+  - id: SEC-203
+    name: Command Injection via Shell
+    severity: critical
+    languages: ["go", "typescript", "javascript", "python"]
+    description: >
+      shell=True or os.system() with user-controlled input enables command
+      injection. AI uses shell=True as a shortcut when building CLI wrapper
+      tools or build scripts. Enables arbitrary OS command execution.
