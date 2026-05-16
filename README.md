@@ -87,13 +87,24 @@ Deterministic AST-based rules built specifically for AI-generated code failure p
 brew install tejgokani/tap/shipcheck
 ```
 
-### Install script (macOS / Linux)
+### Binary (macOS / Linux — one-liner)
 ```bash
-curl -fsSL https://get.shipcheck.dev | sh
+curl -fsSL https://github.com/tejgokani/ShipCheck/releases/latest/download/shipcheck_$(uname -s)_$(uname -m).tar.gz \
+  | tar -xz && sudo mv shipcheck /usr/local/bin/
 ```
 
-### Download binary
-Grab the latest release from [GitHub Releases](https://github.com/tejgokani/shipcheck/releases).
+> **Windows:** download `shipcheck_0.1.0_Windows_x86_64.zip` from [GitHub Releases](https://github.com/tejgokani/ShipCheck/releases/latest), extract, and add to your PATH.
+
+### Manual download
+| Platform | File |
+|---|---|
+| macOS (Apple Silicon) | `shipcheck_0.1.0_Darwin_arm64.tar.gz` |
+| macOS (Intel) | `shipcheck_0.1.0_Darwin_x86_64.tar.gz` |
+| Linux arm64 | `shipcheck_0.1.0_Linux_arm64.tar.gz` |
+| Linux x86_64 | `shipcheck_0.1.0_Linux_x86_64.tar.gz` |
+| Windows x86_64 | `shipcheck_0.1.0_Windows_x86_64.zip` |
+
+All assets: [github.com/tejgokani/ShipCheck/releases/latest](https://github.com/tejgokani/ShipCheck/releases/latest)
 
 ### From source
 ```bash
