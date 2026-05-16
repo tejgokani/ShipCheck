@@ -5,13 +5,17 @@ import (
 	"time"
 )
 
+const cursorSessionJSONL = `{"model":"gpt-4o","timestamp":"2026-05-01T10:00:00Z","cost":0.05,"usage":{"input_tokens":8000,"output_tokens":1500},"file":"src/components/Dashboard.tsx"}
+{"model":"gpt-4o","timestamp":"2026-05-01T10:05:00Z","cost":0.03,"usage":{"input_tokens":5000,"output_tokens":1000},"file":"src/utils/db.ts"}
+{"model":"gpt-4o","timestamp":"2026-05-01T10:10:00Z","cost":0.01,"usage":{"input_tokens":2000,"output_tokens":400},"file":"src/components/Dashboard.tsx"}
+`
 
 func TestParseCursorFile(t *testing.T) {
 	since := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	tests := []struct {
 		name          string
-		fixture       string
+		content       string
 		wantNil       bool
 		wantTokensIn  int64
 		wantTokensOut int64
@@ -19,18 +23,19 @@ func TestParseCursorFile(t *testing.T) {
 	}{
 		{
 			name:          "valid cursor session",
-			fixture:       testdataPath("cursor_session.jsonl"),
+			content:       cursorSessionJSONL,
 			wantNil:       false,
 			wantTokensIn:  8000 + 5000 + 2000,
 			wantTokensOut: 1500 + 1000 + 400,
-			wantFiles:     2, // Dashboard.tsx and db.ts
+			wantFiles:     2,
 		},
 	}
 
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			sess, err := parseCursorFile(tc.fixture, since)
+			path := writeTempJSONL(t, tc.content)
+			sess, err := parseCursorFile(path, since)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -58,7 +63,8 @@ func TestParseCursorFile(t *testing.T) {
 
 func TestParseCursorFile_SinceFiltering(t *testing.T) {
 	since := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
-	sess, err := parseCursorFile(testdataPath("cursor_session.jsonl"), since)
+	path := writeTempJSONL(t, cursorSessionJSONL)
+	sess, err := parseCursorFile(path, since)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -69,7 +75,8 @@ func TestParseCursorFile_SinceFiltering(t *testing.T) {
 
 func TestParseCursorFile_DashboardTouchedTwice(t *testing.T) {
 	since := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	sess, err := parseCursorFile(testdataPath("cursor_session.jsonl"), since)
+	path := writeTempJSONL(t, cursorSessionJSONL)
+	sess, err := parseCursorFile(path, since)
 	if err != nil || sess == nil {
 		t.Fatalf("setup: err=%v, sess=%v", err, sess)
 	}

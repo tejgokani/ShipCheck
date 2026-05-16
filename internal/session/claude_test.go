@@ -1,16 +1,33 @@
 package session
 
 import (
+	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 	"time"
 )
 
-// testdataPath returns the absolute path to a file in testdata/sessions/.
-func testdataPath(name string) string {
-	_, file, _, _ := runtime.Caller(0)
-	return filepath.Join(filepath.Dir(file), "..", "..", "testdata", "sessions", name)
+// claudeSessionJSONL is an inline fixture representing a valid Claude Code session.
+const claudeSessionJSONL = `{"type":"usage","cost":0.42,"tokensIn":21000,"tokensOut":4100,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-01T10:00:00Z","file":"src/auth/middleware.ts","model":"claude-sonnet-4-6"}
+{"type":"usage","cost":0.21,"tokensIn":10500,"tokensOut":2050,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-01T10:05:00Z","file":"src/api/routes.go","model":"claude-sonnet-4-6"}
+{"type":"usage","cost":0.21,"tokensIn":10810,"tokensOut":2054,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-01T10:10:00Z","file":"src/auth/middleware.ts","model":"claude-sonnet-4-6"}
+`
+
+// claudeMalformedJSONL has some invalid lines that should be skipped gracefully.
+const claudeMalformedJSONL = `{"type":"usage","cost":0.10,"tokensIn":5000,"tokensOut":1000,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-01T09:00:00Z","file":"main.go","model":"claude-sonnet-4-6"}
+this is not valid json
+{"broken":
+{"type":"usage","cost":0.05,"tokensIn":2500,"tokensOut":500,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-01T09:05:00Z","file":"main.go","model":"claude-sonnet-4-6"}
+`
+
+func writeTempJSONL(t *testing.T, content string) string {
+	t.Helper()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "session.jsonl")
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatalf("writeTempJSONL: %v", err)
+	}
+	return path
 }
 
 func TestParseClaudeFile(t *testing.T) {
@@ -18,7 +35,7 @@ func TestParseClaudeFile(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		fixture       string
+		content       string
 		wantNil       bool
 		wantTokensIn  int64
 		wantTokensOut int64
@@ -27,20 +44,20 @@ func TestParseClaudeFile(t *testing.T) {
 	}{
 		{
 			name:          "valid session",
-			fixture:       testdataPath("claude_session.jsonl"),
+			content:       claudeSessionJSONL,
 			wantNil:       false,
 			wantTokensIn:  21000 + 10500 + 10810,
 			wantTokensOut: 4100 + 2050 + 2054,
-			wantFiles:     2, // middleware.ts and routes.go
+			wantFiles:     2,
 			wantCost:      0.42 + 0.21 + 0.21,
 		},
 		{
 			name:          "malformed lines are skipped",
-			fixture:       testdataPath("claude_malformed.jsonl"),
+			content:       claudeMalformedJSONL,
 			wantNil:       false,
 			wantTokensIn:  5000 + 2500,
 			wantTokensOut: 1000 + 500,
-			wantFiles:     1, // main.go
+			wantFiles:     1,
 			wantCost:      0.10 + 0.05,
 		},
 	}
@@ -48,7 +65,8 @@ func TestParseClaudeFile(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			sess, err := parseClaudeFile(tc.fixture, since)
+			path := writeTempJSONL(t, tc.content)
+			sess, err := parseClaudeFile(path, since)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -81,7 +99,8 @@ func TestParseClaudeFile(t *testing.T) {
 func TestParseClaudeFile_SinceFiltering(t *testing.T) {
 	// Set since to after all entries — should return nil session.
 	since := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
-	sess, err := parseClaudeFile(testdataPath("claude_session.jsonl"), since)
+	path := writeTempJSONL(t, claudeSessionJSONL)
+	sess, err := parseClaudeFile(path, since)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -92,7 +111,8 @@ func TestParseClaudeFile_SinceFiltering(t *testing.T) {
 
 func TestParseClaudeFile_FileTouchCounts(t *testing.T) {
 	since := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	sess, err := parseClaudeFile(testdataPath("claude_session.jsonl"), since)
+	path := writeTempJSONL(t, claudeSessionJSONL)
+	sess, err := parseClaudeFile(path, since)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -105,7 +125,6 @@ func TestParseClaudeFile_FileTouchCounts(t *testing.T) {
 		fileMap[sess.Files[i].Path] = &sess.Files[i]
 	}
 
-	// middleware.ts should be touched twice.
 	mw, ok := fileMap["src/auth/middleware.ts"]
 	if !ok {
 		t.Fatal("expected src/auth/middleware.ts in files")
@@ -114,7 +133,6 @@ func TestParseClaudeFile_FileTouchCounts(t *testing.T) {
 		t.Errorf("middleware.ts TouchCount: got %d, want 2", mw.TouchCount)
 	}
 
-	// routes.go should be touched once.
 	rt, ok := fileMap["src/api/routes.go"]
 	if !ok {
 		t.Fatal("expected src/api/routes.go in files")
@@ -126,7 +144,7 @@ func TestParseClaudeFile_FileTouchCounts(t *testing.T) {
 
 func TestParseClaudeFile_MissingFile(t *testing.T) {
 	since := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	_, err := parseClaudeFile(testdataPath("does_not_exist.jsonl"), since)
+	_, err := parseClaudeFile("/nonexistent/path/session.jsonl", since)
 	if err == nil {
 		t.Error("expected error for missing file, got nil")
 	}

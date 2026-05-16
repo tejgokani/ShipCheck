@@ -5,12 +5,17 @@ import (
 	"time"
 )
 
+// codexSessionJSONL mixes both token field naming conventions across entries.
+const codexSessionJSONL = `{"type":"completion","timestamp":"2026-05-01T10:00:00Z","model":"gpt-4o","cost":0.50,"usage":{"prompt_tokens":15000,"completion_tokens":3000},"file":"src/main.py"}
+{"type":"completion","timestamp":"2026-05-01T10:05:00Z","model":"gpt-4o","cost":0.25,"usage":{"input_tokens":7500,"output_tokens":1500},"file":"src/utils.py"}
+`
+
 func TestParseCodexFile(t *testing.T) {
 	since := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	tests := []struct {
 		name          string
-		fixture       string
+		content       string
 		wantNil       bool
 		wantTokensIn  int64
 		wantTokensOut int64
@@ -19,7 +24,7 @@ func TestParseCodexFile(t *testing.T) {
 	}{
 		{
 			name:    "valid codex session — mixed prompt_tokens and input_tokens fields",
-			fixture: testdataPath("codex_session.jsonl"),
+			content: codexSessionJSONL,
 			wantNil: false,
 			// First entry uses prompt_tokens/completion_tokens; second uses input_tokens/output_tokens.
 			wantTokensIn:  15000 + 7500,
@@ -32,7 +37,8 @@ func TestParseCodexFile(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			sess, err := parseCodexFile(tc.fixture, since)
+			path := writeTempJSONL(t, tc.content)
+			sess, err := parseCodexFile(path, since)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -64,7 +70,8 @@ func TestParseCodexFile(t *testing.T) {
 
 func TestParseCodexFile_SinceFiltering(t *testing.T) {
 	since := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
-	sess, err := parseCodexFile(testdataPath("codex_session.jsonl"), since)
+	path := writeTempJSONL(t, codexSessionJSONL)
+	sess, err := parseCodexFile(path, since)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
