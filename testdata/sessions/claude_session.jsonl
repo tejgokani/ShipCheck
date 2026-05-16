@@ -1,4 +1,0 @@
-{"type":"tool_use","cost":0.42,"tokensIn":21000,"tokensOut":4100,"cacheReads":9000,"cacheWrites":1500,"timestamp":"2026-05-16T10:00:00Z","file":"src/auth/middleware.ts","model":"claude-sonnet-4-6"}
-{"type":"tool_use","cost":0.21,"tokensIn":10500,"tokensOut":2050,"cacheReads":4500,"cacheWrites":0,"timestamp":"2026-05-16T10:05:00Z","file":"src/api/routes.go","model":"claude-sonnet-4-6"}
-{"type":"tool_use","cost":0.21,"tokensIn":10810,"tokensOut":2054,"cacheReads":4700,"cacheWrites":0,"timestamp":"2026-05-16T10:10:00Z","file":"src/auth/middleware.ts","model":"claude-sonnet-4-6"}
-{"type":"assistant","cost":0.00,"tokensIn":0,"tokensOut":0,"cacheReads":0,"cacheWrites":0,"timestamp":"2026-05-16T10:11:00Z","file":"","model":"claude-sonnet-4-6"}
