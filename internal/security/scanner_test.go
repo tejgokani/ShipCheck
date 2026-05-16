@@ -36,13 +36,19 @@ func writeFile(t *testing.T, dir, name, content string) string {
 	return path
 }
 
-func scanContent(t *testing.T, ext, content string) []Finding {
+func scanContent(t *testing.T, nameOrExt, content string) []Finding {
 	t.Helper()
 	dir := t.TempDir()
-	path := writeFile(t, dir, "file"+ext, content)
+	// If it starts with "." it's an extension; otherwise use as the full filename.
+	var filename string
+	if len(nameOrExt) > 0 && nameOrExt[0] == '.' {
+		filename = "file" + nameOrExt
+	} else {
+		filename = nameOrExt
+	}
+	writeFile(t, dir, filename, content)
 	s := New(dir)
 	findings, err := s.Scan()
-	_ = path
 	if err != nil {
 		t.Fatalf("Scan error: %v", err)
 	}

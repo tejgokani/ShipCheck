@@ -23,6 +23,16 @@ var langByExt = map[string]string{
 	".yaml": "yaml",
 	".yml":  "yaml",
 	".json": "json",
+	".toml": "yaml", // close enough for dep manifest scanning
+}
+
+// specialFiles maps exact filenames (no extension) to language identifiers.
+// These files are scanned regardless of their extension.
+var specialFiles = map[string]string{
+	"requirements.txt": "python",
+	"Pipfile":          "python",
+	"Pipfile.lock":     "python",
+	"pyproject.toml":   "yaml",
 }
 
 // allRules is the full registered rule set (rules live in rules_*.go in this package).
@@ -44,6 +54,9 @@ var allRules = []Rule{
 	DebugMode,
 	NextPublicLeak,
 	DeferredSecurityComment,
+	HallucinatedImport,
+	KnownVulnerablePackage,
+	OverprivilegedScript,
 }
 
 // Scanner runs all registered rules over a directory.
@@ -83,6 +96,8 @@ func (s *Scanner) Scan() ([]Finding, error) {
 		}
 		if _, ok := langByExt[filepath.Ext(path)]; ok {
 			files = append(files, path)
+		} else if _, ok := specialFiles[filepath.Base(path)]; ok {
+			files = append(files, path)
 		}
 		return nil
 	})
@@ -108,6 +123,9 @@ func (s *Scanner) Scan() ([]Finding, error) {
 				return
 			}
 			lang := langByExt[filepath.Ext(path)]
+			if lang == "" {
+				lang = specialFiles[filepath.Base(path)]
+			}
 			for _, rule := range allRules {
 				if !appliesToLang(rule.Languages, lang) {
 					continue
