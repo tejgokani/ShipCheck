@@ -58,8 +58,7 @@ brew install tejgokani/tap/shipcheck
 
 ### Binary (macOS / Linux — one-liner)
 ```bash
-curl -fsSL https://github.com/tejgokani/ShipCheck/releases/latest/download/shipcheck_$(uname -s)_$(uname -m).tar.gz \
-  | tar -xz && sudo mv shipcheck /usr/local/bin/
+curl -fsSL https://shipcheck.space/install.sh | sh
 ```
 
 > **Windows:** download `shipcheck_0.1.0_Windows_x86_64.zip` from [GitHub Releases](https://github.com/tejgokani/ShipCheck/releases/latest), extract, and add to your PATH.
