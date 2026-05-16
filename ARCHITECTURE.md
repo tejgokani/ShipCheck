@@ -30,7 +30,7 @@ Everything is configurable via flags or config file. But defaults must be sane �
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    cmd/scan.go                           │
+│                    cmd/scan.go                          │
 │  (orchestrates the pipeline, no business logic here)    │
 └──────────────────────┬──────────────────────────────────┘
                        │
@@ -44,8 +44,8 @@ Everything is configurable via flags or config file. But defaults must be sane �
   │~/.cursor/    │ │+ session │ │source files  │
   │~/.codex/     │ │timestamps│ │in target dir │
   └──────┬───────┘ └────┬─────┘ └──────┬───────┘
-         │              │               │
-         └──────────────┼───────────────┘
+         │              │              │
+         └──────────────┼──────────────┘
                         ▼
                 ┌───────────────┐
                 │ AuditResult   │
