@@ -2,48 +2,17 @@
 
 **Post-session audit for AI-generated code. Cost. Heat. Security. One command.**
 
+<p align="center">
+  <img src="docs/screenshot-hero.png" alt="shipcheck landing page" width="100%" />
+</p>
+
 ```bash
 brew install tejgokani/tap/shipcheck
-# or
-curl -fsSL https://get.shipcheck.dev | sh
 ```
 
----
-
-```
-$ shipcheck
-
-┌─ shipcheck v0.1.0 ─────────────────────────────────────────────┐
-│  /Users/tej/projects/nexerp              last session: 14m ago  │
-└─────────────────────────────────────────────────────────────────┘
-
-  SCORE   74 / 100   GOOD
-
-  ── COST ────────────────────────────────────────────────────────
-  Session cost        $0.84    (claude-opus-4-6)
-  Tokens in           42,310
-  Tokens out           8,204
-  Cache hits          18,200   saved ~$0.31
-
-  ── HEATMAP (top 5 hot files) ───────────────────────────────────
-  ████████████  src/auth/middleware.ts       12 agent touches
-  ██████████    src/api/routes.go             9 agent touches
-  ████████      prisma/schema.prisma          7 agent touches
-  ██████        src/components/Dashboard.tsx  5 agent touches
-  ████          src/utils/db.ts               4 agent touches
-
-  ── SECURITY (3 findings) ───────────────────────────────────────
-  CRITICAL  src/api/routes.go:47    SQL query uses string concat
-  HIGH      .env.local:3            Supabase service_role in frontend env
-  MEDIUM    src/auth/handler.ts:91  CORS set to wildcard (*)
-
-  ── FIX PROMPTS ─────────────────────────────────────────────────
-  > Fix the 3 security issues found by shipcheck: SQL injection at
-    routes.go:47, exposed service_role key, and wildcard CORS in
-    auth/handler.ts. Apply server-side fixes only.
-
-  Run `shipcheck report` for full HTML report.
-```
+<p align="center">
+  <img src="docs/screenshot-terminal.png" alt="shipcheck terminal output" width="520" />
+</p>
 
 ---
 
